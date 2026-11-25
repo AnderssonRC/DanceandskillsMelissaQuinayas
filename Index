@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: #000;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    .wrap {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+    #sonido {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.92);
+      color: #111;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+    #sonido.oculto { display: none; }
+    #error {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      color: #eee;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    #error code { background: #222; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Cambia "video.mp4" por el nombre de tu archivo. Sube el ?v=1 a ?v=2 cada vez que reemplaces el video. -->
+    <video id="player" src="video.mp4?v=1" controls autoplay muted playsinline preload="auto"></video>
+  </div>
+
+  <button id="sonido">🔊 Activar sonido</button>
+
+  <div id="error">
+    <p>No se encontró el video.<br>
+    Verifica que el archivo esté en el repositorio con el mismo nombre que aparece en <code>index.html</code>.</p>
+  </div>
+
+  <script>
+    const video = document.getElementById('player');
+    const btn = document.getElementById('sonido');
+    const err = document.getElementById('error');
+
+    // Permite abrir otro video del repo con ?video=nombre.mp4
+    const params = new URLSearchParams(location.search);
+    const otro = params.get('video');
+    if (otro) video.src = encodeURI(otro);
+
+    // Intento de reproducción con sonido; si el navegador lo bloquea, sigue en silencio
+    video.muted = false;
+    video.play().then(() => {
+      btn.classList.add('oculto');
+    }).catch(() => {
+      video.muted = true;
+      video.play().catch(() => {});
+    });
+
+    btn.addEventListener('click', () => {
+      video.muted = false;
+      video.volume = 1;
+      video.play();
+      btn.classList.add('oculto');
+    });
+
+    video.addEventListener('volumechange', () => {
+      if (!video.muted) btn.classList.add('oculto');
+    });
+
+    video.addEventListener('error', () => {
+      err.style.display = 'flex';
+      btn.classList.add('oculto');
+    });
+  </script>
+</body>
+</html>
